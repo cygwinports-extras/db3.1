@@ -1,0 +1,123 @@
+db3.1
+------------------------------------------
+Oracle Berkeley DB is the industry-leading open source, embeddable 
+database engine that provides developers with fast, reliable, local 
+persistence with zero administration. Oracle Berkeley DB is a library 
+that links directly into your application. Your application makes simple 
+function calls, rather than sending messages to a remote server, 
+eliminating the performance penalty of client-server architectures.
+
+Runtime requirements:
+  cygwin-1.5.24-2
+  jamvm-1.4.5-1	(for Java bindings)
+  tcl-8.4.15-1	(for Tcl bindings)
+
+Build requirements:
+  cygwin-1.5.24-2
+  autoconf2.5-2.61-1
+  binutils-20060817-1
+  cygport-0.3.1-1
+  fastjar-0.94-1
+  gawk-3.1.5-4
+  gcc-core-3.4.4-3
+  gcc-g++-3.4.4-3
+  jamvm-1.4.5-1
+  jikes-1.22-3
+  libtool1.5-1.5.23a-2
+  make-3.81-1
+  sed-4.1.5-2
+
+Canonical website:
+  http://www.oracle.com/technology/products/berkeley-db/db/index.html
+
+Canonical download:
+  http://download.oracle.com/berkeley-db/
+
+-------------------------------------------
+
+Build instructions:
+  unpack db3.1-3.1.17-X-src.tar.bz2
+    if you use setup to install this src package, it will be
+	 unpacked under /usr/src automatically
+  cd /usr/src
+  cygport ./db3.1-3.1.17-X.cygport all
+
+This will create:
+  /usr/src/db3.1-3.1.17-X-src.tar.bz2
+  /usr/src/db3.1-3.1.17-X.tar.bz2
+  /usr/src/java-db3.1-3.1.17-X.tar.bz2
+  /usr/src/libdb3.1-3.1.17-X.tar.bz2
+  /usr/src/libdb3.1-devel-3.1.17-X.tar.bz2
+  /usr/src/tcl-db3.1-3.1.17-X.tar.bz2
+
+-------------------------------------------
+
+Files included in the binary packages:
+
+(db3.1)
+  /etc/postinstall/db3.1.sh
+  /etc/preremove/db3.1.sh
+  /usr/bin/db3.1_archive.exe
+  /usr/bin/db3.1_checkpoint.exe
+  /usr/bin/db3.1_deadlock.exe
+  /usr/bin/db3.1_dump.exe
+  /usr/bin/db3.1_load.exe
+  /usr/bin/db3.1_printlog.exe
+  /usr/bin/db3.1_recover.exe
+  /usr/bin/db3.1_stat.exe
+  /usr/bin/db3.1_upgrade.exe
+  /usr/bin/db3.1_verify.exe
+  /usr/share/doc/Cygwin/db3.1-3.1.17.README
+  /usr/share/doc/db3.1-3.1.17/LICENSE
+  /usr/share/doc/db3.1-3.1.17/README
+
+(libdb3.1)
+  /usr/bin/cygdb-3.1.dll
+  /usr/bin/cygdb_cxx-3.1.dll
+
+(java-db3.1)
+  /etc/postinstall/java-db3.1.sh
+  /etc/preremove/java-db3.1.sh
+  /usr/bin/cygdb_java-3.1.dll
+  /usr/share/java/db-3.1.jar
+
+(tcl-db3.1)
+  /usr/lib/tcl8.4/db3.1/cygdb_tcl-3.1.dll
+  /usr/lib/tcl8.4/db3.1/pkgIndex.tcl
+
+(libdb3.1-devel)
+  /etc/postinstall/libdb3.1-devel.sh
+  /etc/preremove/libdb3.1-devel.sh
+  /usr/include/db3.1/cxx_common.h
+  /usr/include/db3.1/cxx_except.h
+  /usr/include/db3.1/db.h
+  /usr/include/db3.1/db_185.h
+  /usr/include/db3.1/db_cxx.h
+  /usr/lib/libdb-3.1.a
+  /usr/lib/libdb-3.1.dll.a
+  /usr/lib/libdb-3.1.la
+  /usr/lib/libdb_cxx-3.1.a
+  /usr/lib/libdb_cxx-3.1.dll.a
+  /usr/lib/libdb_cxx-3.1.la
+  /usr/lib/libdb_java-3.1.la
+  /usr/share/doc/db3.1-3.1.17/html/api_c/*
+  /usr/share/doc/db3.1-3.1.17/html/api_cxx/*
+  /usr/share/doc/db3.1-3.1.17/html/api_java/*
+  /usr/share/doc/db3.1-3.1.17/html/api_tcl/*
+  /usr/share/doc/db3.1-3.1.17/html/images/*
+  /usr/share/doc/db3.1-3.1.17/html/index.html
+  /usr/share/doc/db3.1-3.1.17/html/ref/*/*
+  /usr/share/doc/db3.1-3.1.17/html/reftoc.html
+  /usr/share/doc/db3.1-3.1.17/html/sleepycat/*
+  /usr/share/doc/db3.1-3.1.17/html/utility/*
+
+------------------
+
+Port Notes:
+
+----- version 3.1.17-3 -----
+Built with cygport; added Java and Tcl bindings.
+
+
+Cygwin port maintained by:
+http://cygwinports.dotsrc.org/
