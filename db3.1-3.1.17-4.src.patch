@@ -1,0 +1,342 @@
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/dist/Makefile.in src/db-3.1.17/dist/Makefile.in
+--- origsrc/db-3.1.17/dist/Makefile.in	2000-07-18 10:37:57.000000000 -0500
++++ src/db-3.1.17/dist/Makefile.in	2008-01-01 20:02:24.640625000 -0600
+@@ -13,6 +13,7 @@
+ CC=		@MAKEFILE_CC@
+ CCLINK=		@MAKEFILE_CCLINK@
+ CXX=		@MAKEFILE_CXX@
++EXEEXT=		@EXEEXT@
+ 
+ INSTALLER=	@INSTALLER@
+ 
+@@ -30,9 +31,12 @@
+ SOFLAGS=	@SOFLAGS@
+ SOMAJOR=	@DB_VERSION_MAJOR@
+ SOVERSION=	@DB_VERSION_MAJOR@.@DB_VERSION_MINOR@
++TSOLINK=	@TSOLINK@
++XSOLINK=	@XSOLINK@
+ 
+ libdb=		libdb.a
+ 
++libj_jarfile=   db.jar
+ libso_base=	libdb
+ libso_linkname=	$(libso_base)-$(SOVERSION).la
+ libso=		$(libso_base)-$(SOVERSION).@SOSUFFIX@
+@@ -64,6 +68,7 @@
+ CLASSPATH=	$(JAVA_CLASSTOP)
+ JAVAC=		env CLASSPATH=$(CLASSPATH) @JAVAC@
+ JAVACFLAGS=	@JAVACFLAGS@
++JAR=		@JAR@
+ JAVA_BUILTFILE= ./.javabuilt
+ JAVA_CLASSTOP=	$(srcdir)/java/classes
+ JAVA_SRCDIR=	$(srcdir)/java/src
+@@ -237,7 +242,7 @@
+ 	    $(OBJS) $(LDFLAGS) $(LIBSO_LIBS)
+ 
+ $(libxso_target): $(COBJS) $(OBJS)
+-	$(SOLINK) $(SOFLAGS) -o $(libxso_target) \
++	$(XSOLINK) $(SOFLAGS) -o $(libxso_target) \
+ 	    $(COBJS) $(OBJS) $(LDFLAGS) $(LIBXSO_LIBS)
+ 
+ $(libjso_target): $(JOBJS) $(OBJS)
+@@ -245,22 +250,22 @@
+ 	    $(JOBJS) $(OBJS) $(LDFLAGS) $(LIBJSO_LIBS)
+ 
+ $(libtso_target): $(TOBJS) $(OBJS)
+-	$(SOLINK) $(SOFLAGS) -o $(libtso_target) \
++	$(TSOLINK) $(SOFLAGS) -o $(libtso_target) \
+ 	    $(TOBJS) $(OBJS) $(LDFLAGS) $(LIBTSO_LIBS)
+ 
+ ##################################################
+ # Creating individual dependencies and actions for building java files
+ # is possible, but it is very messy and error prone.
+ ##################################################
+-java:	$(JAVA_CLASSTOP) $(JAVA_BUILTFILE)
++java:   $(JAVA_CLASSTOP) $(JAVA_BUILTFILE)
+ 
+ $(JAVA_BUILTFILE): $(JAVA_DBSRCS) $(JAVA_EXSRCS)
+ 	$(JAVAC) -d $(JAVA_CLASSTOP) $(JAVACFLAGS) $(JAVA_DBSRCS)
++	@cd $(JAVA_CLASSTOP) && $(JAR) cf $(libj_jarfile) $(JAVA_DBREL)
+ 	$(JAVAC) -d $(JAVA_CLASSTOP) $(JAVACFLAGS) $(JAVA_EXSRCS)
+ 	@echo This file helps with building java using make > $(JAVA_BUILTFILE)
+ 
+ $(JAVA_CLASSTOP):
+-	@test -f $(mkdir) || (echo 'mkdir not found.'; exit 1)
+ 	$(mkdir) $(JAVA_CLASSTOP)
+ 
+ ##################################################
+@@ -401,7 +406,7 @@
+ 	@$(cp) -p db.h db_185.h $(srcdir)/include/db_cxx.h $(includedir)
+ 	@cd $(includedir) && $(chmod) $(fmode) db.h db_185.h db_cxx.h
+ 
+-install_static: install_setup
++install_static:
+ 	@echo "Installing DB library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -409,7 +414,7 @@
+ 	@$(cp) -p $(libdb) $(libdir)
+ 	@cd $(libdir) && $(chmod) $(fmode) $(libdb)
+ 
+-install_static_cxx: install_setup
++install_static_cxx:
+ 	@echo "Installing DB C++ static library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -417,7 +422,7 @@
+ 	@$(cp) -p $(libcxx) $(libdir)
+ 	@cd $(libdir) && $(chmod) $(fmode) $(libcxx)
+ 
+-install_dynamic: install_setup
++install_dynamic:
+ 	@echo "Installing DB library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -428,7 +433,7 @@
+ 	@cd $(libdir) && $(ln) -s $(libso) $(libso_major)
+ 	@$(LIBTOOL) --mode=finish $(libdir)
+ 
+-install_dynamic_cxx: install_setup
++install_dynamic_cxx:
+ 	@echo "Installing DB C++ library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -438,7 +443,7 @@
+ 	@cd $(libdir) && $(ln) -s $(libxso) $(libxso_default)
+ 	@cd $(libdir) && $(ln) -s $(libxso) $(libxso_major)
+ 
+-install_tcl: install_setup
++install_tcl:
+ 	@echo "Installing DB Tcl library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -448,7 +453,7 @@
+ 	@cd $(libdir) && $(ln) -s $(libtso) $(libtso_default)
+ 	@cd $(libdir) && $(ln) -s $(libtso) $(libtso_major)
+ 
+-install_java: install_setup
++install_java:
+ 	@echo "Installing DB Java library: $(libdir) ..."
+ 	@test -d $(libdir) || \
+ 	    ($(mkdir) -p $(libdir) && $(chmod) $(dmode) $(libdir))
+@@ -458,28 +463,28 @@
+ 	@cd $(libdir) && $(ln) -s $(libjso) $(libjso_default)
+ 	@cd $(libdir) && $(ln) -s $(libjso) $(libjso_major)
+ 	@cd $(libdir) && $(ln) -s $(libjso) $(libjso_g)
++	@$(cp) $(JAVA_CLASSTOP)/$(libj_jarfile) $(libdir)
+ 
+-install_docs: install_setup
++install_docs:
+ 	@echo "Installing documentation: $(docdir) ..."
+ 	@test -d $(docdir) || \
+ 	    ($(mkdir) -p $(docdir) && $(chmod) $(dmode) $(docdir))
+ 	@cd $(docdir) && $(rm) -rf *
+ 	@cd $(srcdir)/docs && $(cp) -pr * $(docdir)/
+ 
+-install_utilities: install_setup
++install_utilities:
+ 	@echo "Installing DB utilities: $(bindir) ..."
+ 	@test -d $(bindir) || \
+ 	    ($(mkdir) -p $(bindir) && $(chmod) $(dmode) $(bindir))
+ 	@cd $(bindir) && $(rm) -f $(PROGS)
+ 	@$(INSTALLER) -fp $(PROGS) $(bindir)
+-	@cd $(bindir) && (test ! -f $(strip) || $(strip) $(PROGS))
+ 	@cd $(bindir) && $(chmod) $(emode) $(PROGS)
+ 
+ uninstall:
+ 	-cd $(bindir) && $(rm) -f $(PROGS)
+ 	-cd $(includedir) && $(rm) -f db.h db_185.h db_cxx.h
+ 	-cd $(libdir) && $(rm) -f $(libdb) $(libcxx) $(libso_target) $(libso) \
+-	    $(libjso) $(libjso_target) $(libtso) $(libtso_target)
++	    $(libjso) $(libjso_target) $(libtso) $(libtso_target) $(libj_jarfile)
+ 	-cd $(docdir) && $(rm) -rf *
+ 
+ ##################################################
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/dist/aclocal/tcl.m4 src/db-3.1.17/dist/aclocal/tcl.m4
+--- origsrc/db-3.1.17/dist/aclocal/tcl.m4	2000-05-11 13:36:08.000000000 -0500
++++ src/db-3.1.17/dist/aclocal/tcl.m4	2008-01-01 19:45:58.218750000 -0600
+@@ -76,7 +76,7 @@
+ 	    # check in a few common install locations
+ 	    if test x"${ac_cv_c_tclconfig}" = x ; then
+ 		for i in `ls -d ${prefix}/lib 2>/dev/null` \
+-			`ls -d /usr/local/lib 2>/dev/null` ; do
++			`ls -d /usr/lib /usr/local/lib 2>/dev/null` ; do
+ 		    if test -f "$i/tclConfig.sh" ; then
+ 			ac_cv_c_tclconfig=`(cd $i; pwd)`
+ 			break
+@@ -123,6 +123,11 @@
+ 	eval TCL_LIB_FLAG="${TCL_LIB_FLAG}"
+ 	eval "TCL_LIB_SPEC=\"${TCL_LIB_SPEC}\""
+ 
++	case "$host_os" in
++	aix*|cygwin*)
++		LIBTSO_LIBS="$LIBTSO_LIBS $TCL_LIB_SPEC $TCL_LIB_FLAG";;
++	esac
++
+ 	AC_SUBST(TCL_BIN_DIR)
+ 	AC_SUBST(TCL_SRC_DIR)
+ 	AC_SUBST(TCL_LIB_FILE)
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/dist/configure.in src/db-3.1.17/dist/configure.in
+--- origsrc/db-3.1.17/dist/configure.in	2000-07-30 12:45:52.000000000 -0500
++++ src/db-3.1.17/dist/configure.in	2008-01-01 19:45:58.218750000 -0600
+@@ -31,6 +31,7 @@
+ AC_SUBST(INSTALL_LIBS)
+ AC_SUBST(JAVAC)
+ AC_SUBST(JAVACFLAGS)
++AC_SUBST(JAR)
+ AC_SUBST(LDFLAGS)
+ AC_SUBST(LIBDB_ARGS)
+ AC_SUBST(LIBJSO_LIBS)
+@@ -46,6 +47,8 @@
+ AC_SUBST(RPC_OBJS)
+ AC_SUBST(SOFLAGS)
+ AC_SUBST(SOLINK)
++AC_SUBST(TSOLINK)
++AC_SUBST(XSOLINK)
+ AC_SUBST(SOSUFFIX)
+ 
+ dnl $o is set to ".o" or ".lo", and is the file suffix used in the
+@@ -91,6 +94,8 @@
+ 	   optimize_def="-O2"
+ 	   LIBS="-lipc $LIBS";;
+ bsdi*)	   optimize_def="-O2";;
++cygwin*)	   optimize_def="-O2"
++	   CPPFLAGS="-D_REENTRANT $CPPFLAGS";;
+ freebsd*)  optimize_def="-O2"
+ 	   CPPFLAGS="-D_THREAD_SAFE $CPPFLAGS"
+            LIBS="-pthread";;
+@@ -199,16 +204,9 @@
+ 	SAVE_CC="${MAKEFILE_CC}"
+ 	SAVE_CXX="${MAKEFILE_CXX}"
+ 
+-	# Configure libtool.
+-	AC_MSG_CHECKING(libtool configuration)
+-	AC_MSG_RESULT([])
+-	${CONFIG_SHELL-/bin/sh} $srcdir/ltconfig \
+-		--no-verify $srcdir/ltmain.sh \
+-		--output=./libtool $host_os \
+-		--disable-static \
+-	|| AC_MSG_ERROR([libtool configure failed])
++	AC_PROG_LIBTOOL
+ 
+-	SOSUFFIX=`sed -e '/^library_names_spec=/!d' -e 's/.*\.\([[a-zA-Z0-9_]]*\).*/\1/' ./libtool`
++	SOSUFFIX=`./libtool --config | sed -e '/^shrext_cmds=/!d' -e 's/.*\.\([[a-zA-Z0-9_]]*\).*/\1/'`
+ 	DEFAULT_LIB="\$(libso_target)"
+ 	DEFAULT_INSTALL="install_dynamic"
+ 	LIBDB_ARGS="\$(libso_linkname)"
+@@ -217,10 +215,13 @@
+ 	MAKEFILE_CC="\$(LIBTOOL) --mode=compile ${SAVE_CC}"
+ 	MAKEFILE_CXX="\$(LIBTOOL) --mode=compile ${SAVE_CXX}"
+ 	MAKEFILE_CCLINK="\$(LIBTOOL) --mode=link ${SAVE_CC}"
++	MAKEFILE_CXXLINK="\$(LIBTOOL) --mode=link ${SAVE_CXX}"
+ 
+ 	INSTALLER="\$(LIBTOOL) --mode=install cp"
+ 	POSTLINK="\$(LIBTOOL) --mode=execute true"
+-	SOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -avoid-version"
++	SOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -avoid-version -no-undefined"
++	TSOLINK="\$(LIBTOOL) --mode=link ${SAVE_CC} -module -avoid-version -no-undefined"
++	XSOLINK="\$(LIBTOOL) --mode=link ${SAVE_CXX} -avoid-version -no-undefined"
+ 	SOFLAGS="-rpath \$(libdir)"
+ 	o=".lo"
+ fi
+@@ -246,49 +247,18 @@
+ 	if test "$JAVAC" = "nojavac"; then
+ 		AC_MSG_ERROR([no javac compiler in PATH])
+ 	fi
+-	AC_PATH_PROG(JAVACABS, javac, nojavac)
+-	ADDITIONAL_LIBS="$ADDITIONAL_LIBS \$(libjso_target)"
+-	ADDITIONAL_LANG="$ADDITIONAL_LANG java"
+-	DEFAULT_INSTALL="${DEFAULT_INSTALL} install_java"
+ 
+-dnl find the include directory relative to the javac executable
+-	while ls -ld "$JAVACABS" 2>/dev/null | grep " -> " >/dev/null; do
+-		AC_MSG_CHECKING(symlink for $JAVACABS)
+-		JAVACLINK=`ls -ld $JAVACABS | sed 's/.* -> //'`
+-		case "$JAVACLINK" in
+-		/*) JAVACABS="$JAVACLINK";;
+-dnl 'X' avoids triggering unwanted echo options.
+-		*) JAVACABS=`echo "X$JAVACABS" | sed -e 's/^X//' -e 's:[[^/]]*$::'`"$JAVACLINK";;
+-		esac
+-		AC_MSG_RESULT($JAVACABS)
+-	done
+-	JTOPDIR=`echo "$JAVACABS" | sed -e 's:/[[^/]]*$::'`
+-	if test -f "$JTOPDIR/include/jni.h"; then
+-		CPPFLAGS="$CPPFLAGSS -I$JTOPDIR/include"
+-	else
+-		JTOPDIR=`echo "$JTOPDIR" | sed -e 's:/[[^/]]*$::'`
+-		if test -f "$JTOPDIR/include/jni.h"; then
+-			CPPFLAGS="$CPPFLAGS -I$JTOPDIR/include"
+-		else
+-			AC_MSG_ERROR([cannot find java include files])
+-		fi
++	AC_CHECK_PROG(JAR, jar, jar, nojar)
++	if test "$JAR" = "nojar"; then
++		AC_MSG_ERROR([no jar in PATH])
+ 	fi
+ 
+-dnl get the likely subdirectories for system specific java includes
+-	case "$host_os" in
+-	solaris*)	JINCSUBDIRS="solaris" ;;
+-	linux*)		JINCSUBDIRS="linux genunix" ;;
+-	*)		JINCSUBDIRS="genunix" ;;
+-	esac
+-
+-	for JINCSUBDIR in $JINCSUBDIRS
+-	do
+-		if test -d "$JTOPDIR/include/$JINCSUBDIR"; then
+-			CPPFLAGS="$CPPFLAGS -I$JTOPDIR/include/$JINCSUBDIR"
+-		fi
+-	done
++	ADDITIONAL_LIBS="$ADDITIONAL_LIBS \$(libjso_target)"
++	ADDITIONAL_LANG="$ADDITIONAL_LANG java"
++	DEFAULT_INSTALL="${DEFAULT_INSTALL} install_java"
+ else
+ 	JAVAC=nojavac
++	JAR=nojar
+ fi
+ 
+ dnl Optional RPC client/server.
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/dist/s_config src/db-3.1.17/dist/s_config
+--- origsrc/db-3.1.17/dist/s_config	1999-11-19 10:14:02.000000000 -0600
++++ src/db-3.1.17/dist/s_config	2008-01-01 19:45:58.234375000 -0600
+@@ -20,7 +20,7 @@
+  echo "AC_SUBST(DB_VERSION_STRING)" &&
+  echo "DB_VERSION_STRING=\"\\\"$DB_VERSION_STRING\\\"\"" &&
+  echo "])dnl" &&
+- cat aclocal/*.m4) > aclocal.m4
++ cat aclocal/*.m4 aclocal/*.ac) > aclocal.m4
+ chmod 444 aclocal.m4
+ 
+ rm -f config.hin
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/env/env_open.c src/db-3.1.17/env/env_open.c
+--- origsrc/db-3.1.17/env/env_open.c	2000-06-30 08:34:54.000000000 -0500
++++ src/db-3.1.17/env/env_open.c	2008-01-01 19:45:58.234375000 -0600
+@@ -33,6 +33,10 @@
+ #include "txn.h"
+ #include "clib_ext.h"
+ 
++#ifdef __lock_close
++#undef __lock_close
++#endif
++
+ static int __dbenv_config __P((DB_ENV *, const char *, u_int32_t));
+ static int __dbenv_refresh __P((DB_ENV *));
+ static int __db_home __P((DB_ENV *, const char *, u_int32_t));
+Files origsrc/db-3.1.17/java/classes/db.jar and src/db-3.1.17/java/classes/db.jar differ
+diff -urN -x CYGWIN-PATCHES -x 'aclocal.m4*' -x autom4te.cache -x config.cache -x config.log -x config.status -x config.h -x config.h.in -x ABOUT-NLS -x Makefile.in.in -x Makevars.template -x '*SlackBuild*' -x '*.egg-info' -x '*.class' -x '*.pyc' -x '*.mo' -x '*.gmo' -x '*.orig' -x '*.rej' -x '*.spec' -x '*.temp' -x '*~' -x '*.stackdump' -x COPYING -x INSTALL -x compile -x config-ml.in -x config.guess -x config.sub -x depcomp -x elisp-comp -x install-sh -x ltmain.sh -x mdate-sh -x missing -x mkinstalldirs -x py-compile -x symlink-tree -x texinfo.tex -x ylwrap -x config.rpath -x omf.make -x xmldocs.make -x gnome-doc-utils.make -x gnome-doc-utils.m4 -x intltool.m4 -x intltool-extract -x intltool-extract.in -x intltool-merge -x intltool-merge.in -x intltool-update -x intltool-update.in -x configure -x config.hin -x libtool.ac origsrc/db-3.1.17/lock/lock_region.c src/db-3.1.17/lock/lock_region.c
+--- origsrc/db-3.1.17/lock/lock_region.c	2000-05-29 21:31:14.000000000 -0500
++++ src/db-3.1.17/lock/lock_region.c	2008-01-01 19:45:58.250000000 -0600
+@@ -32,6 +32,13 @@
+ #include "rpc_client_ext.h"
+ #endif
+ 
++#ifdef __lock_init
++#undef __lock_init
++#endif
++#ifdef __lock_close
++#undef __lock_close
++#endif
++
+ static void __lock_dump_locker __P((DB_LOCKTAB *, DB_LOCKER *, FILE *));
+ static void __lock_dump_object __P((DB_LOCKTAB *, DB_LOCKOBJ *, FILE *));
+ static const char *
